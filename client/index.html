@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html ng-app='groupSketch'>
+	<head>
+		<title>Group Sketch</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
+
+	    <!---<script type ="text/javascript" src="http://192.168.15.143:8000/socket.io/socket.io.js"></script>-->
+		<script type='text/javascript' src='app.js'></script>
+		<script type='text/javascript' src='./f_controllers/controller2.js'></script>
+		<script type='application/javascript' src='./f_controllers/controller1.js'></script>
+		<script type='text/javascript' src='./f_factories/factory1.js'></script>
+		<script type='text/javascript' src='./f_factories/factory2.js'></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+	</head>
+	<body>
+		<div>
+			<div ng-view="">
+			</div>
+		</div>
+	</body>
+</html>

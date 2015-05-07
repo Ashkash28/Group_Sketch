@@ -1,0 +1,336 @@
+<html>
+	<head>
+		<title>Sketch</title>
+		<script>
+			(function($){
+
+				//see what happens if you remove ((.origin))
+			    var socket = io.connect(document.location.origin);
+			  
+			    // Player
+
+			    var Player = function(id) {
+			        this.id = id;
+			        this.x  = 0;
+			        this.y  = 0;
+			        this.name = '';
+			        this.init();
+			    };
+			    
+			    Player.prototype = function(){
+			        var init = function(){
+			            bind.call(this);
+			        },
+			        bind = function(){
+			            $(document).on( 'mousemove', {PlayerObj:this},(function(event) {
+			                var player = event.data.PlayerObj;
+			                player.x = ((event.pageX / $(window).width()) * 100).toFixed(2);
+			                player.y = ((event.pageY / $(window).height()) * 100).toFixed(2);
+			                socket.emit('move',{ friend: player.id, friendX: player.x, friendY: player.y});
+			            }));
+			        };
+			        return {
+			            init: init
+			        };
+			    }();
+
+			    // Friends
+
+			    var Friends  = function() {
+			        this.friends = {};
+			    };
+
+			    Friends.prototype = function(){
+			        var add = function(friend) {
+			                var label = doLabel.call(this,friend.id);
+			                this.friends[label] = friend;
+			            },
+			            remove = function(id){
+			                var label = doLabel.call(this,id);
+			                if ( this.friends[label] ) {
+			                    this.friends[label].remove();
+			                    delete(this.friends[label]);
+			                }
+			            },
+			            update = function(data) {
+			                var label = doLabel.call(this,data.friend);
+			                if ( this.friends[label] ) {
+			                    this.friends[label].update(data.friendX,data.friendY);
+			                }
+			            },
+			            doLabel = function(id){
+			                return 'friend-'+id;
+			            };
+			        return {
+			            add: add,
+			            remove: remove,
+			            update: update
+			        };
+			    }();
+
+			    // Friend
+
+			    var Friend = function(id) {
+			        this.id = id;
+			        this.x  = 0;
+			        this.y  = 0;
+			        this.dx = 0;
+			        this.dy = 0;
+			        this.idx = 'friend-'+id;
+			        this.name = '';
+			        this.element = false;
+			        this.init();
+			    };
+
+			    Friend.prototype = function(){
+			        var init = function() {
+			            if  ( check.call(this) === true ) {
+			                return false;
+			            }
+			        },
+			        create = function() {
+			            this.element = $('<div/>').attr('id',this.idx).addClass('friend').hide().appendTo('body').fadeIn();
+			        },
+			        remove = function() {
+			            if ( this.element ){
+			                this.element.fadeOut('200',function(){
+			                    $(this).remove();
+			                });
+			            }
+			        },
+			        check = function(){
+			            if ( $('#'+this.idx).length > 0 ) {
+			                return true;
+			            }
+			            create.call(this);
+			            return false;
+			        },
+			        update = function(x,y) {
+			            this.element.css({'left':x+'%','top':y+'%'});
+			        };
+			        return {
+			            init: init,
+			            remove: remove,
+			            update: update
+			        };
+			    }();
+
+			    // Functions
+
+			    var Meeting = function(socket) {
+			        this.player = false;
+			        this.friends = new Friends();
+			        this.init();
+			    };
+			    
+			    Meeting.prototype = function(){
+			        var init = function(){
+			                bind.call(this);
+			            },
+			            bind = function(){
+			                var self = this;
+
+			                // Initalize connected
+			                socket.on('connected', function (data) {
+			                    updateTotalConnections(data.connections);
+			                });
+
+			                // Create player and friends
+			                socket.on('init', function (data) {
+			                    $.each(data.friends,function(index,item){
+			                        createFriend.call(self,item,data.player);
+			                    });
+			                    self.player = new Player(data.player);
+			                });
+
+			                // New friend
+			                socket.on('new friend', function (data) {
+			                    createFriend.call(self,data.friend);
+			                });
+
+			                // Friend gone
+			                socket.on('bye friend', function (data) {
+			                    updateTotalConnections(data.connections);
+			                    removeFriend.call(self,data.friend);
+			                });
+
+			                // Friend move
+			                socket.on('move', function (data) {
+			                    self.friends.update(data);
+			                });
+
+			            },
+			            createFriend = function(id,player){
+			                if ( player && player == id ) {
+			                    return;
+			                }
+			                var friend = new Friend(id);
+			                if (friend) {
+			                    this.friends.add(friend);
+			                }
+			            },
+			            removeFriend = function(id) {
+			                this.friends.remove(id);
+			            },
+			            updateTotalConnections = function(total){
+			                $('#connections').html(total);
+			            };
+			        return {
+			            init: init
+			        };
+			    }();
+
+			    var app = new Meeting(socket);
+
+			})(jQuery);
+		</script>
+		<style type="text/css">
+			body{
+				background-image: url("/f_controllers/images/giftly.png");
+				/*background-repeat: repeat-x;*/
+				background-position: center;
+				/*background-color: gray;*/
+			}	
+			canvas{
+				border: 1px solid black;
+				background-color: white;
+				margin-bottom: 50px;
+				border-radius: 15px;
+			}
+			h1{
+				/*border: 3px dashed black;*/
+				color: black;
+			}
+			h4{
+				border-bottom: 1px solid black;
+				color: black;
+				padding-left: 70px;
+			}
+			.options{
+				display: block;
+			}
+			.size{
+				display: inline-block;
+				border: 2px solid black;
+				width: 400px;
+				height: 100px;
+			}
+			.color{
+				display: inline-block;
+				border: 2px solid black;
+				width: 400px;
+				height: 100px;
+			}
+			.eraser{
+				display: inline-block;
+				border: 2px solid black;
+				width: 400px;
+				height: 100px;	
+			}
+			.bottom{
+				display: inline-block;
+				border: 2px solid black;
+				width: 400px;
+				height: 100px;
+			}
+			.bottom{
+				display: inline-block;
+				border: 2px solid black;
+				width: 400px;
+				height: 100px;
+			}
+			.guess{
+				display: inline-block;
+				border: 2px solid black;
+				width: 400px;
+				height: 100px;
+			}
+
+			.red{
+				background-color: red;
+				color: white;
+			}
+			.blue{
+				background-color: blue;
+				color: white;
+			}
+			.green{
+				background-color: green;
+				color: white;
+			}
+			.message_box{
+				border: 1px solid black;
+				height: 200px;
+				width: 200px;
+			}
+			#chatbox{ display: none; position: fixed; background: #000; width:250px; height: 300px; z-index: 10; }
+			.friend {
+			  width: 150px;
+			  height: 150px;
+			  background-image: url("./../static/images/paintbrush.png");
+			  position: absolute;
+			  z-index: 101;
+			  pointer-events: none;
+			  /*background-color: red;*/
+			}
+			.friend .name {
+			  display: inline;
+			  position: relative;
+			  left: 16px;
+			  top: 8px;
+			  pointer-events: none;
+			  color: #fff;
+			  text-shadow: none;
+			  background: #000;
+			  border-radius: 2px;
+			  -webkit-border-radius: 2px;
+			  -moz-border-radius: 2px;
+			  white-space: nowrap;
+			  padding: 1px;
+			  font-size: 10px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="canvas" width='1200' height='400'></canvas>
+		<div class='container'>
+			<h1>Game Canvas</h1>
+			<h2>{{ word }}</h2>
+			<h2>{{ result }}</h2>
+			<h2>Score: {{ score }}</h2>
+			<div class='options'>
+				<div class='size'>
+					<h4>Size</h4>
+					<button type='button' class="btn btn-default" ng-click="changeSize_sma()">Small</button>
+					<button type='button' class="btn btn-default" ng-click="changeSize_med()">Medium</button>
+					<button type='button' class="btn btn-default" ng-click="changeSize_lar()">Large</button>
+				</div>
+				<div class='color'>
+					<h4>Color</h4>
+					<button type='button' class="btn btn-danger" ng-click="changeColor_red()">Red</button>
+					<button type='button' class="btn btn-primary" ng-click="changeColor_blue()">Blue</button>
+					<button type='button' class="btn btn-success" ng-click="changeColor_green()">Green</button>
+					<button type='button' class="btn btn-default" ng-click="changeColor_black()">Default</button>
+				</div>
+				<div class='eraser'>
+					<h4>Eraser</h4>
+					<button type='button' class="btn btn-default" ng-click="erase()">Erase</button>
+					<button type='button' class="btn btn-default" ng-click="erase_all()">Erase All</button>
+				</div>
+				<div class='bottom'>
+					<h4>Choose Word</h4>
+					<button type='button' class='btn btn-info' ng-click='getWord()'>Get Word </button>
+				</div>
+				<div class='guess'>
+					<h4>Guess</h4>
+					<input type='text' ng-model='guess'>
+					<button type='button' class="btn btn-warning" ng-click="guess_word()">Guess</button> 
+				</div>
+				<div id="chatbox"></div>
+				<button onclick="chat.render()">Open Chat Window</button>
+				<button onclick="chat.ok()">Close Chat Window</button>
+			</div>
+		</div>
+	</body>
+</html>
