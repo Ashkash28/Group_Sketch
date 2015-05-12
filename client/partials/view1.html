@@ -265,9 +265,9 @@
 			}
 			#chatbox{ display: none; position: fixed; background: #000; width:250px; height: 300px; z-index: 10; }
 			.friend {
-			  width: 150px;
-			  height: 150px;
-			  background-image: url("./../static/images/paintbrush.png");
+			  width: 24px;
+			  height: 33px;
+			  background-image: url("./../static/images/cur116.cur");
 			  position: absolute;
 			  z-index: 101;
 			  pointer-events: none;
@@ -279,7 +279,7 @@
 			  left: 16px;
 			  top: 8px;
 			  pointer-events: none;
-			  color: #fff;
+			  color: #000;
 			  text-shadow: none;
 			  background: #000;
 			  border-radius: 2px;
@@ -296,7 +296,7 @@
 		<canvas id="canvas" width='1200' height='400'></canvas>
 		<div class='container'>
 			<h1>Game Canvas</h1>
-			<h2>{{ word }}</h2>
+			<h2>{{ word }}{{ chosen }}</h2>
 			<h2>{{ result }}</h2>
 			<h2>Score: {{ score }}</h2>
 			<div class='options'>
@@ -327,9 +327,17 @@
 					<input type='text' ng-model='guess'>
 					<button type='button' class="btn btn-warning" ng-click="guess_word()">Guess</button> 
 				</div>
-				<div id="chatbox"></div>
+				<div class="rules">
+					<h1>Rules</h1>
+					<h5>1) Once all players are on, one player clicks get a word</h5>
+					<h5>2) The same player tries to draw the word</h5>
+					<h5>3) Other players try to guess the word</h5>
+					<h5>4) Once guess has been successful, the winner clicks get a word</h5>
+					<h5>5) Process repeats</h5>
+				</div>
+				<!-- <div id="chatbox"></div>
 				<button onclick="chat.render()">Open Chat Window</button>
-				<button onclick="chat.ok()">Close Chat Window</button>
+				<button onclick="chat.ok()">Close Chat Window</button> -->
 			</div>
 		</div>
 	</body>

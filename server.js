@@ -80,6 +80,7 @@ io.sockets.on('connection', function(socket){
 		word = words[Math.floor(Math.random() * words.length)];
 
 		socket.emit('sending_word', word);
+		socket.broadcast.emit('word_chosen', 'A word has been chosen');
 	})
 
 	socket.on('guess_c', function(data){

@@ -109,6 +109,36 @@ $scope.changeSize_lar = function()
 		})
 	}
 
+	$scope.getWord = function(){
+		$scope.chosen = '';
+
+		canvasFactory.getWord(function(data){
+		})
+	}
+
+
+	canvasFactory.gotWord(function(data){
+		$scope.word = data;
+		$scope.$digest();
+	})
+
+	canvasFactory.getResult(function(string, point){
+		$scope.result = string;
+		$scope.score = point;
+		$scope.$digest();
+	})
+
+	canvasFactory.wordPicked(function(data){
+		$scope.word = '';
+		$scope.chosen = data;
+		$scope.$digest();
+	})
+
+	$scope.guess_word = function(){
+		canvasFactory.guess_word($scope.guess, function(output, data){
+
+		})
+	}
 
 
 

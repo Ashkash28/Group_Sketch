@@ -6,6 +6,7 @@ groupSketch.factory('canvasFactory', function(){
 	var radius = 0.004;
 	var color = '#000';
 	var hue = 'rgba(0,0,0,0)';
+	var score = 0;
 	var isDrawing, lastPoint;
 	ctx.lineJoin = ctx.lineCap = 'round';
 
@@ -24,6 +25,56 @@ groupSketch.factory('canvasFactory', function(){
 	// 	hue: 'rgba(0,0,0,0)',
 	// 	radius: 0.004,
 	// };
+
+//------WORD PORTION---------------------------------------------------------->
+
+ factory.getResult = function(callback)
+ {
+ 	socket.on('user_guess_c', function(data){
+ 		callback(data);
+ 	})
+ 	socket.on('you_guess_c', function(data){
+ 		console.log('before');
+ 		console.log(score);
+
+ 		score = score + 1;
+ 		console.log('This is the score');
+ 		console.log(score);
+ 		callback(data, score);
+ 	})
+ 	socket.on('user_guess_w', function(data){
+ 		callback(data);
+ 	})
+ 	socket.on('you_guess_w', function(data){
+
+ 		callback(data);
+ 	})
+ }
+
+ factory.getWord = function(callback)
+ {
+	socket.emit('need_word', {some: 'data'});
+ }
+
+ factory.gotWord = function(callback)
+ {
+ 	socket.on('sending_word', function(data){
+ 		callback(data);
+ 	})
+ }
+
+ factory.guess_word = function(data, callback)
+ {
+ 		socket.emit('guess_c', data);
+ }
+
+ factory.wordPicked = function(callback)
+ {
+ 	socket.on('word_chosen', function(data){
+ 		callback(data);
+ 	})
+ }
+
 
 //--------------CHANGES THE MOUSE POINTER------------------------------------->
 
